@@ -11,7 +11,7 @@
     .layout { min-height: 100dvh; display: grid; grid-template-columns: clamp(7rem, 24vw, 17rem) minmax(0, 1fr); }
     aside { background: #142945; color: #fff; padding: clamp(.65rem, 3vw, 2.25rem); }
     h1 { font: 500 clamp(1rem, 3vw, 2rem)/1.15 Georgia, serif; margin: .5rem 0 2rem; }
-    nav { display: grid; gap: .35rem; }
+    nav { display: grid; gap: .35rem; position: sticky; top: 1rem; }
     button { font: inherit; cursor: pointer; }
     nav button { text-align: left; color: #fff; border: 0; background: transparent; border-radius: .45rem; padding: .7rem .45rem; }
     nav button:hover { background: #253e5f; }
@@ -24,6 +24,10 @@
     .word { font-size: clamp(2rem, 8.7vw, 8rem); }
     .latin { max-width: 38rem; color: #354d68; font-size: clamp(.95rem, 2vw, 1.3rem); line-height: 1.65; }
     .hint { color: #526071; font-size: .85rem; }
+    .vertical { align-content: start; text-align: center; }
+    .vertical section + section { border-top: 1px solid #dcd4c1; padding-top: 1.25rem; }
+    .vertical h2 { font-size: 1rem; margin: 0 0 .5rem; }
+    .vertical p { white-space: pre-line; margin: 0; }
     [hidden] { display: none; }
   </style>
 </head>
@@ -36,6 +40,7 @@
         <button type="button" data-mode="0" aria-pressed="false">Blessing 1</button>
         <button type="button" data-mode="1" aria-pressed="false">Blessing 2</button>
         <button type="button" data-mode="2" aria-pressed="false">Blessing 3</button>
+        <button type="button" data-mode="vertical" aria-pressed="false">Vertical</button>
       </nav>
     </aside>
     <main>
@@ -44,6 +49,7 @@
         <span id="latin" class="latin" hidden></span>
         <span id="hint" class="hint"></span>
       </button>
+      <div id="vertical" class="card vertical" hidden></div>
     </main>
   </div>
   <script>
@@ -80,7 +86,20 @@
     }
 
     const navigation = document.querySelectorAll('nav button');
-    const card = document.querySelector('.card');
+    const card = document.querySelector('button.card');
+    const vertical = document.querySelector('#vertical');
+    blessings.forEach((blessing, index) => {
+      const section = document.createElement('section');
+      const heading = document.createElement('h2');
+      heading.textContent = `Blessing ${index + 1}`;
+      const text = document.createElement('p');
+      text.className = 'hebrew';
+      text.lang = 'he';
+      text.dir = 'rtl';
+      text.textContent = `${opening} ${blessing.hebrew}`.replaceAll(' ', '\n');
+      section.append(heading, text);
+      vertical.append(section);
+    });
     const hebrew = document.querySelector('#hebrew');
     const latin = document.querySelector('#latin');
     const hint = document.querySelector('#hint');
@@ -89,6 +108,11 @@
     let showTransliteration = false;
 
     function render() {
+      const showingVertical = mode === 'vertical';
+      vertical.hidden = !showingVertical;
+      card.hidden = showingVertical;
+      if (showingVertical) return;
+
       const practicingWords = mode === 'words';
       const finished = wordIndex === words.length;
       const blessing = blessings[mode];
