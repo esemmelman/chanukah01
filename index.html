@@ -23,6 +23,7 @@
     .card { display: grid; align-content: center; justify-items: center; gap: 1.25rem; padding: clamp(.75rem, 5vw, 4rem); border: 1px solid #dcd4c1; border-radius: 1rem; background: #fffdf7; color: inherit; }
     .card:disabled { cursor: default; }
     .hebrew { font-family: "Noto Serif Hebrew", "Times New Roman", serif; font-size: clamp(1.65rem, 5vw, 4rem); line-height: 1.55; }
+    .hebrew { max-width: 100%; overflow-wrap: anywhere; }
     .word { font-size: clamp(2.25rem, 11vw, 11rem); }
     .latin { max-width: 38rem; color: #354d68; font-size: clamp(.95rem, 2vw, 1.3rem); line-height: 1.65; }
     .hint { color: #526071; font-size: .85rem; }
@@ -58,26 +59,26 @@
   </div>
   <script>
     // Traditional Ashkenaz candle-lighting text, with an independently written transliteration.
-    const opening = 'בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם';
+    const opening = 'בָּ·רוּךְ אַ·תָּה אֲ·דֹ·נָי אֱ·לֹ·הֵי·נוּ מֶ·לֶךְ הָ·עוֹ·לָם';
     const openingLatin = 'Barukh atah Adonai, Eloheinu melekh ha-olam,';
     const blessings = [
       {
-        hebrew: 'אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ לְהַדְלִיק נֵר חֲנֻכָּה',
+        hebrew: 'אֲ·שֶׁר קִ·דְּ·שָׁ·נוּ בְּ·מִצְ·וֹ·תָיו וְ·צִ·וָּ·נוּ לְ·הַדְ·לִיק נֵר חֲ·נֻ·כָּה',
         latin: 'asher kideshanu bemitzvotav vetzivanu lehadlik ner Chanukah.'
       },
       {
-        hebrew: 'שֶׁעָשָׂה נִסִּים לַאֲבוֹתֵינוּ בַּיָּמִים הָהֵם בַּזְּמַן הַזֶּה',
+        hebrew: 'שֶׁ·עָ·שָׂה נִ·סִּים לַ·אֲ·בוֹ·תֵי·נוּ בַּ·יָּ·מִים הָ·הֵם בַּ·זְּ·מַן הַ·זֶּה',
         latin: 'she-asah nisim la-avoteinu bayamim hahem bazman hazeh.'
       },
       {
-        hebrew: 'שֶׁהֶחֱיָנוּ וְקִיְּמָנוּ וְהִגִּיעָנוּ לַזְּמַן הַזֶּה',
+        hebrew: 'שֶׁ·הֶ·חֱ·יָ·נוּ וְ·קִ·יְּ·מָ·נוּ וְ·הִ·גִּי·עָ·נוּ לַ·זְּ·מַן הַ·זֶּה',
         latin: 'shehecheyanu vekiyemanu vehigiyanu lazman hazeh.'
       }
     ];
     const uniqueWords = new Map();
     for (const text of [opening, ...blessings.map(blessing => blessing.hebrew)]) {
       for (const word of text.split(' ')) {
-        const spelling = word.normalize('NFD').replace(/\p{M}/gu, '');
+        const spelling = word.normalize('NFD').replace(/[\p{M}·]/gu, '');
         if (!uniqueWords.has(spelling)) uniqueWords.set(spelling, word);
       }
     }
@@ -90,9 +91,10 @@
     }
 
     const navigation = document.querySelectorAll('nav button');
+    const syllables = document.querySelector('#syllables');
     const card = document.querySelector('button.card');
     const vertical = document.querySelector('#vertical');
-    blessings.forEach((blessing, index) => {
+    const verticalTexts = blessings.map((_, index) => {
       const section = document.createElement('section');
       const heading = document.createElement('h2');
       heading.textContent = `Blessing ${index + 1}`;
@@ -100,9 +102,9 @@
       text.className = 'hebrew';
       text.lang = 'he';
       text.dir = 'rtl';
-      text.textContent = `${opening} ${blessing.hebrew}`.replaceAll(' ', '\n');
       section.append(heading, text);
       vertical.append(section);
+      return text;
     });
     const hebrew = document.querySelector('#hebrew');
     const latin = document.querySelector('#latin');
@@ -111,17 +113,27 @@
     let wordIndex = 0;
     let showTransliteration = false;
 
+    function formatHebrew(text) {
+      // Spell out the prayer pronunciation of יְיָ when showing its syllables.
+      return syllables.checked ? text : text.replaceAll('אֲ·דֹ·נָי', 'יְיָ').replaceAll('·', '');
+    }
+
     function render() {
       const showingVertical = mode === 'vertical';
       vertical.hidden = !showingVertical;
       card.hidden = showingVertical;
-      if (showingVertical) return;
+      if (showingVertical) {
+        verticalTexts.forEach((text, index) => {
+          text.textContent = formatHebrew(`${opening} ${blessings[index].hebrew}`).replaceAll(' ', '\n');
+        });
+        return;
+      }
 
       const practicingWords = mode === 'words';
       const finished = wordIndex === words.length;
       const blessing = blessings[mode];
       hebrew.classList.toggle('word', practicingWords);
-      hebrew.textContent = practicingWords ? words[wordIndex] ?? '' : `${opening} ${blessing.hebrew}`;
+      hebrew.textContent = formatHebrew(practicingWords ? words[wordIndex] ?? '' : `${opening} ${blessing.hebrew}`);
       latin.hidden = practicingWords || !showTransliteration;
       latin.textContent = latin.hidden ? '' : `${openingLatin} ${blessing.latin}`;
       card.disabled = practicingWords ? finished : !showTransliteration;
@@ -150,6 +162,7 @@
       else showTransliteration = false;
       render();
     });
+    syllables.addEventListener('change', render);
     shuffleWords();
     render();
   </script>
