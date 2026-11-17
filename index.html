@@ -21,13 +21,14 @@
     .card { display: grid; align-content: center; justify-items: center; gap: 1.25rem; padding: clamp(.75rem, 5vw, 4rem); border: 1px solid #dcd4c1; border-radius: 1rem; background: #fffdf7; color: inherit; }
     .card:disabled { cursor: default; }
     .hebrew { font-family: "Noto Serif Hebrew", "Times New Roman", serif; font-size: clamp(1.65rem, 5vw, 4rem); line-height: 1.55; }
-    .word { font-size: clamp(2rem, 8.7vw, 8rem); }
+    .word { font-size: clamp(2.25rem, 11vw, 11rem); }
     .latin { max-width: 38rem; color: #354d68; font-size: clamp(.95rem, 2vw, 1.3rem); line-height: 1.65; }
     .hint { color: #526071; font-size: .85rem; }
+    .hint:empty { display: none; }
     .vertical { align-content: start; text-align: center; }
     .vertical section + section { border-top: 1px solid #dcd4c1; padding-top: 1.25rem; }
     .vertical h2 { font-size: 1rem; margin: 0 0 .5rem; }
-    .vertical p { white-space: pre-line; margin: 0; }
+    .vertical p { white-space: pre-line; margin: 0; font-size: clamp(2.25rem, 7vw, 6rem); }
     [hidden] { display: none; }
   </style>
 </head>
@@ -122,7 +123,7 @@
       latin.textContent = latin.hidden ? '' : `${openingLatin} ${blessing.latin}`;
       card.disabled = practicingWords ? finished : !showTransliteration;
       if (practicingWords) {
-        hint.textContent = finished ? 'All words reviewed. Select Words to start again.' : 'Click for the next word';
+        hint.textContent = finished ? 'All words reviewed. Select Words to start again.' : '';
       } else {
         hint.textContent = showTransliteration ? 'Click to hide the transliteration' : '';
       }
