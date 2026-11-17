@@ -72,6 +72,13 @@
       }
     }
     const words = [...uniqueWords.values()];
+    function shuffleWords() {
+      for (let index = words.length - 1; index > 0; index -= 1) {
+        const other = Math.floor(Math.random() * (index + 1));
+        [words[index], words[other]] = [words[other], words[index]];
+      }
+    }
+
     const navigation = document.querySelectorAll('nav button');
     const card = document.querySelector('.card');
     const hebrew = document.querySelector('#hebrew');
@@ -100,7 +107,10 @@
     navigation.forEach(button => {
       button.addEventListener('click', () => {
         const nextMode = button.dataset.mode;
-        if (nextMode === 'words' && wordIndex === words.length) wordIndex = 0;
+        if (nextMode === 'words' && wordIndex === words.length) {
+          shuffleWords();
+          wordIndex = 0;
+        }
         mode = nextMode;
         showTransliteration = mode !== 'words';
         navigation.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
@@ -112,6 +122,7 @@
       else showTransliteration = false;
       render();
     });
+    shuffleWords();
     render();
   </script>
 </body>
