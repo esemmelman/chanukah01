@@ -10,6 +10,8 @@
     body { margin: 0; background: #f6f3eb; color: #142945; font-family: system-ui, sans-serif; }
     .layout { min-height: 100dvh; display: grid; grid-template-columns: clamp(7rem, 24vw, 17rem) minmax(0, 1fr); }
     aside { background: #142945; color: #fff; padding: clamp(.65rem, 3vw, 2.25rem); }
+    .syllables { display: inline-flex; align-items: center; gap: .35rem; font-size: .875rem; cursor: pointer; }
+    .syllables input { margin: 0; accent-color: #f2d48c; }
     h1 { font: 500 clamp(1rem, 3vw, 2rem)/1.15 Georgia, serif; margin: .5rem 0 2rem; }
     nav { display: grid; gap: .35rem; position: sticky; top: 1rem; }
     button { font: inherit; cursor: pointer; }
@@ -35,6 +37,7 @@
 <body>
   <div class="layout">
     <aside>
+      <label class="syllables"><input type="checkbox" id="syllables"> Syllables</label>
       <h1>Chanukah<br>Blessings</h1>
       <nav aria-label="Practice mode">
         <button type="button" data-mode="words" aria-pressed="true">Words</button>
