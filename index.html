@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142945">
+  <title>Chanukah Blessings</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f6f3eb; color: #142945; font-family: system-ui, sans-serif; }
+    .layout { min-height: 100dvh; display: grid; grid-template-columns: clamp(7rem, 24vw, 17rem) minmax(0, 1fr); }
+    aside { background: #142945; color: #fff; padding: clamp(.65rem, 3vw, 2.25rem); }
+    h1 { font: 500 clamp(1rem, 3vw, 2rem)/1.15 Georgia, serif; margin: .5rem 0 2rem; }
+    nav { display: grid; gap: .35rem; }
+    button { font: inherit; cursor: pointer; }
+    nav button { text-align: left; color: #fff; border: 0; background: transparent; border-radius: .45rem; padding: .7rem .45rem; }
+    nav button:hover { background: #253e5f; }
+    nav button[aria-pressed="true"] { background: #f2d48c; color: #142945; }
+    button:focus-visible { outline: 3px solid #c48826; outline-offset: 4px; }
+    main { display: grid; padding: clamp(.55rem, 4vw, 4rem); }
+    .card { display: grid; align-content: center; justify-items: center; gap: 1.25rem; padding: clamp(.75rem, 5vw, 4rem); border: 1px solid #dcd4c1; border-radius: 1rem; background: #fffdf7; color: inherit; }
+    .card:disabled { cursor: default; }
+    .hebrew { font-family: "Noto Serif Hebrew", "Times New Roman", serif; font-size: clamp(1.65rem, 5vw, 4rem); line-height: 1.55; }
+    .word { font-size: clamp(2rem, 8.7vw, 8rem); }
+    .latin { max-width: 38rem; color: #354d68; font-size: clamp(.95rem, 2vw, 1.3rem); line-height: 1.65; }
+    .hint { color: #526071; font-size: .85rem; }
+    [hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h1>Chanukah<br>Blessings</h1>
+      <nav aria-label="Practice mode">
+        <button type="button" data-mode="words" aria-pressed="true">Words</button>
+        <button type="button" data-mode="0" aria-pressed="false">Blessing 1</button>
+        <button type="button" data-mode="1" aria-pressed="false">Blessing 2</button>
+        <button type="button" data-mode="2" aria-pressed="false">Blessing 3</button>
+      </nav>
+    </aside>
+    <main>
+      <button type="button" class="card" aria-describedby="hint">
+        <span id="hebrew" class="hebrew" lang="he" dir="rtl" aria-live="polite"></span>
+        <span id="latin" class="latin" hidden></span>
+        <span id="hint" class="hint"></span>
+      </button>
+    </main>
+  </div>
+  <script>
+    // Traditional Ashkenaz candle-lighting text, with an independently written transliteration.
+    const opening = 'בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם';
+    const openingLatin = 'Barukh atah Adonai, Eloheinu melekh ha-olam,';
+    const blessings = [
+      {
+        hebrew: 'אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ לְהַדְלִיק נֵר חֲנֻכָּה',
+        latin: 'asher kideshanu bemitzvotav vetzivanu lehadlik ner Chanukah.'
+      },
+      {
+        hebrew: 'שֶׁעָשָׂה נִסִּים לַאֲבוֹתֵינוּ בַּיָּמִים הָהֵם בַּזְּמַן הַזֶּה',
+        latin: 'she-asah nisim la-avoteinu bayamim hahem bazman hazeh.'
+      },
+      {
+        hebrew: 'שֶׁהֶחֱיָנוּ וְקִיְּמָנוּ וְהִגִּיעָנוּ לַזְּמַן הַזֶּה',
+        latin: 'shehecheyanu vekiyemanu vehigiyanu lazman hazeh.'
+      }
+    ];
+    const uniqueWords = new Map();
+    for (const text of [opening, ...blessings.map(blessing => blessing.hebrew)]) {
+      for (const word of text.split(' ')) {
+        const spelling = word.normalize('NFD').replace(/\p{M}/gu, '');
+        if (!uniqueWords.has(spelling)) uniqueWords.set(spelling, word);
+      }
+    }
+    const words = [...uniqueWords.values()];
+    const navigation = document.querySelectorAll('nav button');
+    const card = document.querySelector('.card');
+    const hebrew = document.querySelector('#hebrew');
+    const latin = document.querySelector('#latin');
+    const hint = document.querySelector('#hint');
+    let mode = 'words';
+    let wordIndex = 0;
+    let showTransliteration = false;
+
+    function render() {
+      const practicingWords = mode === 'words';
+      const finished = wordIndex === words.length;
+      const blessing = blessings[mode];
+      hebrew.classList.toggle('word', practicingWords);
+      hebrew.textContent = practicingWords ? words[wordIndex] ?? '' : `${opening} ${blessing.hebrew}`;
+      latin.hidden = practicingWords || !showTransliteration;
+      latin.textContent = latin.hidden ? '' : `${openingLatin} ${blessing.latin}`;
+      card.disabled = practicingWords ? finished : !showTransliteration;
+      if (practicingWords) {
+        hint.textContent = finished ? 'All words reviewed. Select Words to start again.' : 'Click for the next word';
+      } else {
+        hint.textContent = showTransliteration ? 'Click to hide the transliteration' : '';
+      }
+    }
+
+    navigation.forEach(button => {
+      button.addEventListener('click', () => {
+        const nextMode = button.dataset.mode;
+        if (nextMode === 'words' && wordIndex === words.length) wordIndex = 0;
+        mode = nextMode;
+        showTransliteration = mode !== 'words';
+        navigation.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        render();
+      });
+    });
+    card.addEventListener('click', () => {
+      if (mode === 'words') wordIndex += 1;
+      else showTransliteration = false;
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>
