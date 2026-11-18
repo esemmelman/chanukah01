@@ -115,7 +115,7 @@
 
     function formatHebrew(text) {
       // Spell out the prayer pronunciation of יְיָ when showing its syllables.
-      return syllables.checked ? text : text.replaceAll('אֲ·דֹ·נָי', 'יְיָ').replaceAll('·', '');
+      return syllables.checked ? text.replaceAll('·', ' ') : text.replaceAll('אֲ·דֹ·נָי', 'יְיָ').replaceAll('·', '');
     }
 
     function render() {
@@ -124,7 +124,7 @@
       card.hidden = showingVertical;
       if (showingVertical) {
         verticalTexts.forEach((text, index) => {
-          text.textContent = formatHebrew(`${opening} ${blessings[index].hebrew}`).replaceAll(' ', '\n');
+          text.textContent = formatHebrew(`${opening} ${blessings[index].hebrew}`.replaceAll(' ', '\n'));
         });
         return;
       }
