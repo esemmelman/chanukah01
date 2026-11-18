@@ -23,7 +23,7 @@
     .card { display: grid; align-content: center; justify-items: center; gap: 1.25rem; padding: clamp(.75rem, 5vw, 4rem); border: 1px solid #dcd4c1; border-radius: 1rem; background: #fffdf7; color: inherit; }
     .card:disabled { cursor: default; }
     .hebrew { font-family: "Noto Serif Hebrew", "Times New Roman", serif; font-size: clamp(1.65rem, 5vw, 4rem); line-height: 1.55; }
-    .hebrew { max-width: 100%; overflow-wrap: anywhere; }
+    .hebrew { max-width: 100%; overflow-wrap: anywhere; white-space: pre-wrap; }
     .word { font-size: clamp(2.25rem, 11vw, 11rem); }
     .latin { max-width: 38rem; color: #354d68; font-size: clamp(.95rem, 2vw, 1.3rem); line-height: 1.65; }
     .hint { color: #526071; font-size: .85rem; }
@@ -115,7 +115,8 @@
 
     function formatHebrew(text) {
       // Spell out the prayer pronunciation of יְיָ when showing its syllables.
-      return syllables.checked ? text.replaceAll('·', ' ') : text.replaceAll('אֲ·דֹ·נָי', 'יְיָ').replaceAll('·', '');
+      if (syllables.checked) return text.replaceAll(' ', '  ').replaceAll('·', ' ');
+      return text.replaceAll('אֲ·דֹ·נָי', 'יְיָ').replaceAll('·', '');
     }
 
     function render() {
